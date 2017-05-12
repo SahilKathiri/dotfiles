@@ -134,10 +134,3 @@ BULLETTRAIN_PROMPT_ORDER=(
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" 
-
-
-export TERRAIN_CAR_SECRET='6(vm+h2_t9a677axofevq&f_f!^qe=+czp3r+c*i#1id6b^%pk'
-export AWS_ACCESS_KEY_ID='AKIAIEZ4DBSUQNXNIQJA'
-export AWS_SECRET_ACCESS_KEY='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'
-export S3_BUCKET_NAME='terrain-car-assets'
-export S3_BUCKET_REGION='ap-south-1'
