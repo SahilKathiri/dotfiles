@@ -1,0 +1,25 @@
+syntax enable
+set background=dark
+
+set expandtab
+set smarttab
+
+set showcmd
+set wildmenu
+
+set shiftwidth=4
+set tabstop=4
+
+set autoindent
+set smartindent
+set wrap
+set number
+
+set laststatus=2
+
+map 0 ^
+
+
+iabbr psvm public static void main(String[] args) {}
+iabbr sop System.out.println();
+iabbr scin Scanner inp = new Scanner(System.in);
