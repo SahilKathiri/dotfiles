@@ -1,0 +1,4 @@
+[user]
+    name = Your Full Name
+    email = your-email@company.com
+    signingkey = YOUR_GPG_KEY_ID

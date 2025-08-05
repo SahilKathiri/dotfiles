@@ -1,0 +1,42 @@
+# Include local user configuration (not tracked in git)
+[include]
+    path = ~/.gitconfig-local
+
+# Work project folders
+[includeIf "gitdir:~/Projects/"]
+    path = ~/.gitconfig-work
+
+# Personal project folders
+[includeIf "gitdir:~/Code/"]
+    path = ~/.gitconfig-personal
+
+[includeIf "gitdir:~/dotfiles/"]
+    path = ~/.gitconfig-personal
+
+# Global Git settings
+[core]
+    ; editor = code --wait
+    ; autocrlf = input
+    excludesfile = ~/.gitignore_global
+
+; [push]
+;     default = simple
+;     autoSetupRemote = true
+;
+; [pull]
+;     rebase = false
+;
+; [init]
+;     defaultBranch = main
+;
+; [diff]
+;     tool = vscode
+;
+; [difftool "vscode"]
+;     cmd = code --wait --diff $LOCAL $REMOTE
+;
+; [merge]
+;     tool = vscode
+;
+; [mergetool "vscode"]
+;     cmd = code --wait $MERGED

@@ -1,0 +1,11 @@
+[include]
+    path = ~/.gitconfig-personal-local
+
+[url "git@github-personal:"]
+    insteadOf = git@github.com:
+
+[commit]
+    gpgsign = true
+
+[tag]
+    gpgsign = true
