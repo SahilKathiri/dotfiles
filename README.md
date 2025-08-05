@@ -12,7 +12,7 @@ This repository contains my personal configuration files (dotfiles) for various 
 
 2. Use GNU Stow to symlink configurations. For example, to install the `nvim` and `zsh` configs:
    ```sh
-   stow nvim zsh
+   stow nvim zsh ...
    ```
 
 Each directory corresponds to a set of configuration files for a specific application.
@@ -30,7 +30,3 @@ Each directory corresponds to a set of configuration files for a specific applic
 ## Requirements
 
 - [GNU Stow](https://www.gnu.org/software/stow/)
-- 
-```
-
-
