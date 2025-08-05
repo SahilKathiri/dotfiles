@@ -17,9 +17,20 @@ This repository contains my personal configuration files (dotfiles) for various 
 
 Each directory corresponds to a set of configuration files for a specific application.
 
+## Applications configured
+- ghostty: Terminal of choice
+- git: Personal and work git configurations
+- lazygit: nvim git ui
+- nvim: neovim configuration
+- ohmyposh: Shell prompt
+- ssh: Used for personal and work git configurations
+- tmux: Terminal multiplexer
+- zsh: Shell configuration with zinit
+
 ## Requirements
 
 - [GNU Stow](https://www.gnu.org/software/stow/)
+- 
 ```
 
 
