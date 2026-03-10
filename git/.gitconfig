@@ -15,28 +15,24 @@
 
 # Global Git settings
 [core]
-    ; editor = code --wait
-    ; autocrlf = input
     excludesfile = ~/.gitignore_global
+    pager = delta
 
-; [push]
-;     default = simple
-;     autoSetupRemote = true
-;
-; [pull]
-;     rebase = false
-;
-; [init]
-;     defaultBranch = main
-;
-; [diff]
-;     tool = vscode
-;
-; [difftool "vscode"]
-;     cmd = code --wait --diff $LOCAL $REMOTE
-;
-; [merge]
-;     tool = vscode
-;
-; [mergetool "vscode"]
-;     cmd = code --wait $MERGED
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true
+    side-by-side = true
+    line-numbers = true
+    syntax-theme = base16
+
+[push]
+    default = simple
+    autoSetupRemote = true
+
+[pull]
+    rebase = false
+
+[init]
+    defaultBranch = main

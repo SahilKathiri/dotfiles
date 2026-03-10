@@ -63,23 +63,51 @@ setopt hist_find_no_dups
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu no
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
-zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --color=always --icons $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza --color=always --icons $realpath'
+zstyle ':fzf-tab:complete:*' fzf-preview 'bat --color=always --line-range :100 $realpath 2>/dev/null || eza --color=always --icons $realpath'
 
 # Aliases
 alias ls="eza"
 alias vi="nvim"
 alias vim="nvim"
+alias cat="bat"
+alias grep="rg"
+alias find="fd"
+
+# yazi - change cwd on quit
+function y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    builtin cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
+}
 
 # Shell Integrations
 eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/zen.toml)"
 eval "$(zoxide init --cmd cd zsh)"
+eval "$(mise activate zsh)"
+
+# FZF - use fd for listing, bat for previews
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_DEFAULT_OPTS='--height 50% --layout=reverse --border'
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :500 {}'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {}'"
 eval "$(fzf --zsh)"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 export XDG_CONFIG_HOME="$HOME/.config"
-eval "$(ssh-agent -s)"
-echo 'ssh-add ~/.ssh/id_ed25519 ~/.ssh/id_personal'
-
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+if [ -z "$SSH_AUTH_SOCK" ]; then
+  eval "$(ssh-agent -s)" > /dev/null
+fi
+if [ "$(uname)" = "Darwin" ]; then
+  ssh-add --apple-load-keychain 2>/dev/null
+else
+  ssh-add -q ~/.ssh/id_ed25519 ~/.ssh/id_personal 2>/dev/null
+fi
+export PATH="$HOME/.local/bin:$PATH"
