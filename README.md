@@ -29,11 +29,11 @@ Each top-level directory is a Stow package. Running `stow <package>` creates sym
 dotfiles/
 ├── .stowrc          # Sets stow target to $HOME
 ├── ghostty/         # Terminal emulator config
-├── git/             # Git config (personal + work profiles)
+├── git/             # Git config
 ├── lazygit/         # Lazygit TUI config
 ├── nvim/            # Neovim (LazyVim) config
 ├── ohmyposh/        # Shell prompt themes
-├── ssh/             # SSH config for multiple GitHub accounts
+├── ssh/             # SSH config (Bitwarden SSH agent)
 ├── tmux/            # Tmux config + plugins
 └── zsh/             # Zsh config with Zinit
 ```
@@ -203,7 +203,7 @@ vim → nvim
 
 **History:** 5000 lines, deduplication, shared across sessions.
 
-**SSH agent:** Started automatically; loads `~/.ssh/id_ed25519` and `~/.ssh/id_personal`.
+**SSH agent:** Uses [Bitwarden](https://bitwarden.com) as the SSH agent via `SSH_AUTH_SOCK`. Bitwarden Desktop must be running and unlocked. Keys are stored in the Bitwarden vault, not on disk.
 
 **NVM:** Sourced from `~/.nvm` if present.
 
@@ -277,54 +277,46 @@ Lazy.nvim auto-installs to `~/.local/share/nvim/lazy/lazy.nvim` on first launch.
 
 **Symlinks:**
 - `git/.gitconfig` → `~/.gitconfig`
-- `git/.gitconfig-personal` → `~/.gitconfig-personal`
-- `git/.gitconfig-work` → `~/.gitconfig-work`
 - `git/.gitignore_global` → `~/.gitignore_global`
 - `git/.gitconfig-local-example` → `~/.gitconfig-local-example`
 
-**Profile system:** Git uses conditional includes to load different identities based on which directory you're working in:
+**Identity:** Set once in `~/.gitconfig-local` (not committed). GPG signing is enabled globally for commits and tags.
 
-| Directory | Config loaded |
-|-----------|--------------|
-| `~/Projects/` | `~/.gitconfig-work` → `~/.gitconfig-work-local` |
-| `~/Code/` | `~/.gitconfig-personal` → `~/.gitconfig-personal-local` |
-| `~/dotfiles/` | `~/.gitconfig-personal` → `~/.gitconfig-personal-local` |
-| anywhere else | `~/.gitconfig-local` |
-
-**SSH host aliases** (in `.gitconfig-personal` and `.gitconfig-work`):
-```
-git@github-personal: → git@github.com (uses ~/.ssh/id_personal)
-git@github-work:     → git@github.com (uses ~/.ssh/id_ed25519)
-```
-
-**GPG signing:** Enabled for commits and tags in both work and personal profiles.
-
-**Files you must create yourself** (not committed, listed in `.gitignore_global`):
-
-```sh
-# ~/.gitconfig-local (base identity)
-[user]
-    name = Your Name
-    email = you@example.com
-    signingkey = YOUR_GPG_KEY_ID
-
-# ~/.gitconfig-work-local (work identity)
-[user]
-    name = Your Name
-    email = you@work.com
-    signingkey = YOUR_WORK_GPG_KEY_ID
-
-# ~/.gitconfig-personal-local (personal identity)
-[user]
-    name = Your Name
-    email = you@personal.com
-    signingkey = YOUR_PERSONAL_GPG_KEY_ID
-```
-
-Use `.gitconfig-local-example` as a starting template:
+**Setup:**
 ```sh
 cp ~/.gitconfig-local-example ~/.gitconfig-local
+nvim ~/.gitconfig-local  # fill in name, email, signingkey
 ```
+
+<details>
+<summary>Per-directory identities (e.g. work vs personal)</summary>
+
+If you need different emails or GPG keys per directory, add `includeIf` blocks to `~/.gitconfig`:
+
+```ini
+[includeIf "gitdir:~/Projects/"]
+    path = ~/.gitconfig-work-local
+
+[includeIf "gitdir:~/Code/"]
+    path = ~/.gitconfig-personal-local
+```
+
+Then create the override files:
+```sh
+# ~/.gitconfig-work-local
+[user]
+    email = you@work.com
+    signingkey = WORK_GPG_KEY_ID
+
+# ~/.gitconfig-personal-local
+[user]
+    email = you@personal.com
+    signingkey = PERSONAL_GPG_KEY_ID
+```
+
+The base `~/.gitconfig-local` identity applies everywhere else. `includeIf` blocks loaded later win, so put them before the `[include]` for `~/.gitconfig-local` if you want the local override to always win — or after if you want the directory-specific config to win.
+
+</details>
 
 ---
 
@@ -332,45 +324,31 @@ cp ~/.gitconfig-local-example ~/.gitconfig-local
 
 **Symlink:** `ssh/.ssh/config` → `~/.ssh/config`
 
-Configures two separate SSH identities for GitHub, enabling you to have distinct work and personal accounts:
+SSH keys are managed by [Bitwarden](https://bitwarden.com). The SSH agent socket is set in `.zshrc` — Bitwarden Desktop must be running and unlocked for SSH authentication to work.
+
+The config sets a default identity for GitHub:
 
 ```
-Host github-work
-    HostName github.com
+Host github.com
+    User git
     IdentityFile ~/.ssh/id_ed25519
     IdentitiesOnly yes
-    AddKeysToAgent yes
-
-Host github-personal
-    HostName github.com
-    IdentityFile ~/.ssh/id_personal
-    IdentitiesOnly yes
-    AddKeysToAgent yes
 ```
 
-**Generate the keys if they don't exist:**
-```sh
-# Work key
-ssh-keygen -t ed25519 -C "you@work.com" -f ~/.ssh/id_ed25519
+`IdentityFile` is used as a hint to the agent — the private key file does not need to exist on disk.
 
-# Personal key
-ssh-keygen -t ed25519 -C "you@personal.com" -f ~/.ssh/id_personal
+**Adding a key to Bitwarden:**
+1. Open Bitwarden Desktop → Settings → Security → enable **SSH Agent**
+2. Create a new item → type **SSH Key** → paste or generate the private key
+
+**Adding keys for other hosts** (e.g. a server):
+```
+Host myserver
+    HostName 1.2.3.4
+    User ubuntu
 ```
 
-Add both public keys to their respective GitHub accounts under **Settings → SSH and GPG keys**.
-
-**Using the aliases:**
-```sh
-# Clone a work repo
-git clone git@github-work:your-org/repo.git
-
-# Clone a personal repo
-git clone git@github-personal:your-username/repo.git
-```
-
-**macOS:** Keys are added to the keychain automatically via `AddKeysToAgent yes`.
-
-**Linux:** You may need to start `ssh-agent` in your shell profile or use a systemd user service. The `.zshrc` handles this automatically.
+Without `IdentitiesOnly`, Bitwarden will offer all vault keys and the server accepts whichever matches its `authorized_keys`.
 
 ---
 
@@ -484,12 +462,14 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ```
 Then open tmux and press `Ctrl+s` + `I`.
 
-**SSH keys not loading on Linux**
+**SSH keys not working**
 
-The `.zshrc` starts `ssh-agent` and runs `ssh-add`. If you're not using zsh as your login shell, you may need to start the agent separately or configure a systemd user service:
-```sh
-systemctl --user enable --now ssh-agent
-```
+SSH is handled by Bitwarden's SSH agent. Make sure:
+1. Bitwarden Desktop is running and **unlocked**
+2. Your keys are stored as **SSH Key** items in the vault
+3. SSH Agent is enabled in Bitwarden Settings → Security
+
+Test with `ssh-add -l` — it should list your vault keys.
 
 **Lazygit config not found on macOS**
 

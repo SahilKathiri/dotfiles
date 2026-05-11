@@ -1,20 +1,12 @@
-# Work project folders
-[includeIf "gitdir:~/Projects/"]
-    path = ~/.gitconfig-work
-
-# Personal project folders
-[includeIf "gitdir:~/Code/"]
-    path = ~/.gitconfig-personal
-
-[includeIf "gitdir:~/dotfiles/"]
-    path = ~/.gitconfig-personal
-
-# Machine-level override — loaded last so it wins over all conditional includes above.
-# On a personal machine, set user/email/signingkey here and skip work-local/personal-local entirely.
 [include]
     path = ~/.gitconfig-local
 
-# Global Git settings
+[commit]
+    gpgsign = true
+
+[tag]
+    gpgsign = true
+
 [core]
     excludesfile = ~/.gitignore_global
     pager = delta
