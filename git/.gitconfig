@@ -1,7 +1,3 @@
-# Include local user configuration (not tracked in git)
-[include]
-    path = ~/.gitconfig-local
-
 # Work project folders
 [includeIf "gitdir:~/Projects/"]
     path = ~/.gitconfig-work
@@ -12,6 +8,11 @@
 
 [includeIf "gitdir:~/dotfiles/"]
     path = ~/.gitconfig-personal
+
+# Machine-level override — loaded last so it wins over all conditional includes above.
+# On a personal machine, set user/email/signingkey here and skip work-local/personal-local entirely.
+[include]
+    path = ~/.gitconfig-local
 
 # Global Git settings
 [core]
