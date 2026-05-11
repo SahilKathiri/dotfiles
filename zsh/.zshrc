@@ -102,12 +102,14 @@ eval "$(fzf --zsh)"
 export XDG_CONFIG_HOME="$HOME/.config"
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
-if [ -z "$SSH_AUTH_SOCK" ]; then
-  eval "$(ssh-agent -s)" > /dev/null
-fi
-if [ "$(uname)" = "Darwin" ]; then
-  ssh-add --apple-load-keychain 2>/dev/null
-else
-  ssh-add -q ~/.ssh/id_ed25519 ~/.ssh/id_personal 2>/dev/null
-fi
+# TODO: remove old ssh-agent block once Bitwarden SSH agent is confirmed working
+# if [ -z "$SSH_AUTH_SOCK" ]; then
+#   eval "$(ssh-agent -s)" > /dev/null
+# fi
+# if [ "$(uname)" = "Darwin" ]; then
+#   ssh-add --apple-load-keychain 2>/dev/null
+# else
+#   ssh-add -q ~/.ssh/id_ed25519 ~/.ssh/id_personal 2>/dev/null
+# fi
+export SSH_AUTH_SOCK="$HOME/Library/Containers/com.bitwarden.desktop/Data/.bitwarden-ssh-agent.sock"
 export PATH="$HOME/.local/bin:$PATH"
